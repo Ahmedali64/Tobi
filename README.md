@@ -152,7 +152,7 @@ Key tables:
 - `sessions` - Session management
 
 ## ERD
-
+<img width="2029" height="2312" alt="ERD_YT" src="https://github.com/user-attachments/assets/b92308e5-08e7-47bc-9e59-8fb348a1031d" />
 ## Security
 
 - Input validation with class-validator
