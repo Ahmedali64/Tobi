@@ -89,7 +89,8 @@ cp .env.example .env
 - services.msc
 - look for MYSQL stop it 
 - start dockercompose
-docker-compose up -d 
+# do not forget to check on your `.env` file name, values and attach it here before running this command
+docker-compose --env-file .env.development.local up -d 
 ```
 
 This starts:
