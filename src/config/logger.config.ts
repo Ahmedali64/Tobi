@@ -2,7 +2,6 @@ import pino, { StreamEntry, DestinationStream, Level } from 'pino';
 import { Params } from 'nestjs-pino';
 import { join } from 'path';
 import { mkdirSync, existsSync } from 'fs';
-import { Request, Response } from 'express';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -49,7 +48,7 @@ const streams: StreamEntry[] = [
     stream: pino.transport({
       target: 'pino-roll',
       options: {
-        file: join(logsDir, 'combined.log'),
+        file: join(logsDir, 'error.log'),
         frequency: 'daily',
         size: '10m',
         mkdir: true,
@@ -63,20 +62,17 @@ const streams: StreamEntry[] = [
 
 export const pinoConfig: Params = {
   pinoHttp: {
-    level: isProduction ? 'info' : 'debug',
+    autoLogging: false,
     stream: pino.multistream(streams),
+    /*
+      Why did we do this ?
+      - Because Pino will attach these objects whenever we call its logger, and I don’t want that noise
+      - So I set them to undefined and handle everything myself in the exception filter
+    */
     serializers: {
-      req: (req: Request) => ({
-        method: req.method,
-        url: req.url,
-        query: req.query,
-        params: req.params,
-        headers: isProduction ? undefined : req.headers, // Just to see the cookies header
-      }),
-      res: (res: Response) => ({
-        statusCode: res.statusCode,
-      }),
-      err: pino.stdSerializers.err,
+      err: () => undefined,
+      req: () => undefined,
+      res: () => undefined,
     },
   },
 };
