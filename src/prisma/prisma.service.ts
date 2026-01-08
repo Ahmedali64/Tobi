@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaClient } from 'src/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { ConfigService } from '@nestjs/config';
@@ -8,11 +13,14 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  private readonly logger = new Logger(PrismaService.name);
+
   constructor(private configService: ConfigService) {
     const dbHost = configService.getOrThrow<string>('DB_HOST');
     const dbPort = configService.getOrThrow<number>('DB_PORT');
     const dbUser = configService.getOrThrow<string>('DB_USER');
     const dbName = configService.getOrThrow<string>('DB_NAME');
+    const dbConnections = configService.getOrThrow<number>('DB_CONNECTION');
     const dbPassword = configService.getOrThrow<string>('DB_USER_PASSWORD');
 
     /*
@@ -26,7 +34,7 @@ export class PrismaService
       user: dbUser,
       password: dbPassword,
       database: dbName,
-      connectionLimit: 12,
+      connectionLimit: dbConnections,
     });
     super({
       adapter,
@@ -38,18 +46,23 @@ export class PrismaService
   async onModuleInit() {
     try {
       await this.$connect();
-      console.log('Database connected successfully');
+      const dbConnections =
+        this.configService.getOrThrow<number>('DB_CONNECTION');
+
+      this.logger.log(
+        `Database connected successfully, with a pool of: ${dbConnections} connections`,
+      );
     } catch (error) {
-      console.log('Database connection failed');
+      this.logger.error(`Database connection failed`);
       throw error;
     }
   }
   async onModuleDestroy() {
     try {
       await this.$disconnect();
-      console.log('Database disconnected successfully');
+      this.logger.log(`Database disconnected successfully`);
     } catch (error) {
-      console.log('Database disconnection failed');
+      this.logger.error(`Database disconnection failed`);
       throw error;
     }
   }

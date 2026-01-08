@@ -167,11 +167,22 @@ Key tables:
 - Session tokens in Redis
 
 ## Monitoring & Logging
-- Structured logging with Winston
+- Structured logging with Pino
 - Error tracking with Sentry
 - Performance monitoring
 - Global error handling
 
+## Performance
+
+I will be explaining here some decisions that I have made to improve the app performance and reduce latency
+
+#### prisma version 7 
+  * In this version specifically, they have replaced the old Rust heavy engine with a lightweight TypeScript one, which improved the query performance by X3 times  
+
+
+#### Pino
+ * I was about to use winston to for logging, but while I was reading the documentation, I found that Nest recommends using Pino because it is using a separate thread to handle logging instead of the main Event Loop, which is less work on the main thread equals faster app
+ 
 ## Contributing
 
 This is a portfolio project, but if you want to ontribute, please follow this structure : )
